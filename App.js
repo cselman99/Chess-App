@@ -1,20 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import HomeScreen from './Components/HomeScreen';
+import BoardView from './Components/BoardView';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  // myTheme = {
+  //   ...DefaultTheme,
+  //   colors: {
+  //     ...DefaultTheme.colors,
+  //     primary: '#000',
+  //     text: '#fff'
+  //   },
+  // };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer theme={DarkTheme}>
+       <Stack.Navigator>
+         <Stack.Screen
+           name="PhotoSelect"
+           component={HomeScreen}
+           options={{ title: 'Home' }}
+         />
+         <Stack.Screen
+            name="BoardView"
+            component={BoardView} 
+            options={{ title: 'Results' }}
+          />
+       </Stack.Navigator>
+     </NavigationContainer>
+    // {/* <HomeScreen /> */}
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
