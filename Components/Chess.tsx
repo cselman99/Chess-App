@@ -7,7 +7,7 @@ import Board from "./Board";
 // https://github.com/wcandillon/can-it-be-done-in-react-native/tree/master/season4/src/Chess
 // =========================================================================================== //
 
-const Chess = (pieces) => {
+const Chess = (data) => {
   var board = [
     ['', '', '', '', '', '', '', ''],
     ['', '', '', '', '', '', '', ''],
@@ -23,9 +23,9 @@ const Chess = (pieces) => {
   var pieceName;
   var pieceLoc;
 
-  const contents = pieces['pieces']['pieces'];  // Gross JSON notation. NEED TO FIX
-  console.log(contents);
-  console.log(contents.length);
+  const contents = data['pieces'];  // Gross JSON notation. NEED TO FIX
+  console.log(data['pieces']);
+  // console.log(contents.length);
   if (contents == undefined) {
     console.log("Could not detect pieces");
     alert("Could not detect pieces.");
@@ -36,7 +36,7 @@ const Chess = (pieces) => {
       x = pieceLoc[0];
       y = pieceLoc[1];
       board[y][x] = pieceName
-      console.log(`${x}, ${y} – ${pieceName}}`);
+      // console.log(`${x}, ${y} – ${pieceName}}`);
     }
   }
 
@@ -62,12 +62,11 @@ const Chess = (pieces) => {
   }
 
   fen_notation = fen_notation.substring(0, fen_notation.length - 1);
-  fen_notation += ' b - c3 0 10'; // temp
-  console.log(fen_notation);
+  fen_notation += ' b - c3 0 19'; // temp
 
   return (
     <View style={styles.container}>
-      <Board fem={fen_notation} />
+      <Board fen={fen_notation} />
     </View>
   );
 };

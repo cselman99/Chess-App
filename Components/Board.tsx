@@ -29,10 +29,10 @@ const styles = StyleSheet.create({
   },
 });
 
-const Board = (fen) => {
-  const chess = useConst(() => new Chess(fen));
+const Board = (data) => {
+  const chess = useConst(() => new Chess(data["fen"]));
   const [state, setState] = useState({
-    player: "b",
+    player: "w",
     board: chess.board(),
   });
   const onTurn = useCallback(() => {

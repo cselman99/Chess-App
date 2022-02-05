@@ -6,37 +6,10 @@ import Chess from './Chess'
 
 export default function BoardView() {
     const [moveNum, setMoveNum] = useState(1);
+    const [moveDescriptor, setMoveDescriptor] = useState("Bishop to E4");
     const route = useRoute();
     const { pieces } = route.params;
 
-    const tempPieces = {
-        "pieces": [
-            [
-                "q",
-                [3, 4]
-            ],
-            [
-                "Q",
-                [6, 7]
-            ],
-            [
-                "k",
-                [3, 5]
-            ],
-            [
-                "K",
-                [5, 7]
-            ],
-            [
-                "p",
-                [5, 4]
-            ],
-            [
-                "P",
-                [6, 4]
-            ]
-        ]
-    }
 
     const prevPress = () => {
         if (moveNum == 1) {
@@ -52,7 +25,6 @@ export default function BoardView() {
         setMoveNum(moveNum + 1);
     }
 
-    var moveDescriptor = "Bishop to E4";
 
     return (
         <View style={styles.container}>
@@ -61,7 +33,7 @@ export default function BoardView() {
             </View>
 
             <View style={{flex: 2.5, backgroundColor: '#000'}}>
-                <Chess pieces={tempPieces} />
+                <Chess pieces={pieces} />
             </View>
 
             <View style={styles.captionContainer}>

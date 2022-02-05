@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +18,15 @@ export default function HomeScreen() {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
+    useEffect(() => {
+            if ('pieces' in board) {
+                console.log("Set State completed", board);
+                setImage(default_img_uri);
+                setImageUploadStatus(false);
+                navigation.navigate('BoardView', board);
+            }
+        }, [board])
+
 
     const selectFile = () => setFilePopupMenu(!filePopupMenu);
     const takePhoto = async () => {
@@ -25,7 +34,6 @@ export default function HomeScreen() {
         const res = await ImagePicker.getCameraPermissionsAsync();
         if (Platform.OS == "ios" && res.status !== 'granted') {
             const {s} = await ImagePicker.requestCameraPermissionsAsync();
-            console.log(s)
             if (s.status !== 'granted') {
             alert("Features may be limited without access");
             return;
@@ -66,15 +74,8 @@ export default function HomeScreen() {
     };
 
     const submitPressed = async () => {
-        const res = await uploadImage();
-        if (!res || !("pieces" in board)) { //  FAILURE TO UPLOAD
-            alert('Failed to process image. Please try again.');
-            return;
-        }
-        setImage(default_img_uri);
         setFilePopupMenu(false);
-        setImageUploadStatus(false);
-        navigation.navigate('BoardView', board);
+        await uploadImage();
     }
 
     const uploadImage = async () => {
@@ -102,7 +103,6 @@ export default function HomeScreen() {
             .then(response => response.json())
             .then(pieces => setBoard(pieces))
             .catch(err => console.log("Failed to retrieve moves.\n" + err));
-        // console.log(board);
         return 1;
     };
 
