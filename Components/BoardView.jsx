@@ -1,53 +1,63 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import Chess from './Chess'
+import ChessContainer from './BoardComponents/ChessContainer'
+
+
+const pieceMap = {
+    "p": "Pawn",
+    "r": "Rook",
+    "n": "Knight",
+    "k": "King",
+    "q": "Queen",
+    "b": "Bishop"
+}
+
+
+function extractMove(move) {
+    const color = move['color'] === 'w' ? 'White' : 'Black';
+    const from = move['from'];
+    const to = move['to'];
+    const piece = move['piece'];
+    // const captured = move['captured'];
+    return "Move " + color + " " + pieceMap[piece] + " from " + from + " to " + to
+}
 
 
 export default function BoardView() {
-    const [moveNum, setMoveNum] = useState(1);
-    const [moveDescriptor, setMoveDescriptor] = useState("Bishop to E4");
     const route = useRoute();
-    const { pieces } = route.params;
+    const { fen, bestMoves } = route.params;
+    const [moveDescriptor, setMoveDescriptor] = useState("");
+    const turn = bestMoves['color'];
+    console.log(bestMoves);
 
-
-    const prevPress = () => {
-        if (moveNum == 1) {
-            return;
-        }
-        setMoveNum(moveNum - 1);
-    }
-
-    const nextPress = () => {
-        if (moveNum == 10) {
-            return;
-        }
-        setMoveNum(moveNum + 1);
-    }
+    useEffect(() => {
+        setMoveDescriptor(extractMove(bestMoves));
+    }, [bestMoves]);
 
 
     return (
         <View style={styles.container}>
             <View style={styles.titleContainer} >
-                <Text style={styles.title}>#{moveNum} Move</Text>
+                <Text style={styles.title}>Best Move for {turn === 'w' ? 'White' : 'Black'}</Text>
             </View>
 
-            <View style={{flex: 2.5, backgroundColor: '#000'}}>
-                <Chess pieces={pieces} />
+            <View style={{flex: 0.75, backgroundColor: '#000'}}>
+                <ChessContainer pieces={fen} pressEvent={() => console.log("made it")}/>
             </View>
 
             <View style={styles.captionContainer}>
                 <Text style={styles.subText}>{moveDescriptor}</Text>
             </View>
             
-            <View style={styles.buttonContainer}>
+            {/* <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={prevPress} style={styles.button}>
                     <Text style={styles.buttonText}>Previous</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={nextPress} style={styles.button}>
                     <Text style={styles.buttonText}>Next</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </View>
     );
     
@@ -87,12 +97,12 @@ const styles = StyleSheet.create({
 
     titleContainer: {
         width: '100%',
-        height: 80,
+        height: 70,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
         marginTop: 40,
-        backgroundColor: '#000',
+        backgroundColor: '#333',
     },
 
     title: {
@@ -113,7 +123,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 80,
         padding: 20,
-        backgroundColor: '#000'
+        backgroundColor: '#333'
     },
 
 });

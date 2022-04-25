@@ -1,5 +1,7 @@
 import HomeScreen from './Components/HomeScreen';
+import EditView from './Components/EditView';
 import BoardView from './Components/BoardView';
+import PromptView from './Components/PromptView';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -23,6 +25,16 @@ export default function App() {
            component={HomeScreen}
            options={{ title: 'Home' }}
          />
+         <Stack.Screen
+            name="PromptView"
+            component={PromptView}
+            options={{ title: 'Game Questions' }}
+          />
+         <Stack.Screen
+            name="EditView"
+            component={EditView}
+            options={{ title: 'Edit Board' }}
+          />
          <Stack.Screen
             name="BoardView"
             component={BoardView} 

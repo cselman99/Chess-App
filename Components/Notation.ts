@@ -31,3 +31,36 @@ export const toPosition = ({ x, y }: Vector) => {
   const row = `${8 - Math.round(y / SIZE)}`;
   return `${col}${row}` as Position;
 };
+
+export const PIECES = {
+  r: require("../assets/br.png"),
+  p: require("../assets/bp.png"),
+  n: require("../assets/bn.png"),
+  b: require("../assets/bb.png"),
+  q: require("../assets/bq.png"),
+  k: require("../assets/bk.png"),
+  R: require("../assets/wr.png"),
+  N: require("../assets/wn.png"),
+  B: require("../assets/wb.png"),
+  Q: require("../assets/wq.png"),
+  K: require("../assets/wk.png"),
+  P: require("../assets/wp.png"),
+};
+
+export const BLACK_PIECES = {
+  p: require("../assets/bp.png"),
+  r: require("../assets/br.png"),
+  n: require("../assets/bn.png"),
+  b: require("../assets/bb.png"),
+  q: require("../assets/bq.png"),
+  k: require("../assets/bk.png"),
+}
+
+export const WHITE_PIECES = {
+  P: require("../assets/wp.png"),
+  R: require("../assets/wr.png"),
+  N: require("../assets/wn.png"),
+  B: require("../assets/wb.png"),
+  Q: require("../assets/wq.png"),
+  K: require("../assets/wk.png"),
+}

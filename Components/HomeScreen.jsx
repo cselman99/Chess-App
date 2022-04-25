@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground, Platform } from 'react-native';
+import { StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    Image,
+    ImageBackground,
+    Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions } from 'react-native';
 import default_img from '../assets/default-image.jpeg';
+import { ActivityIndicator } from 'react-native-paper';
+import * as FS from 'expo-file-system';
 
 
 export default function HomeScreen() {
@@ -12,20 +20,31 @@ export default function HomeScreen() {
     const [image, setImage] = useState(default_img_uri);
     const [filePopupMenu, setFilePopupMenu] = useState(false);
     const [imageUploadStatus, setImageUploadStatus] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [board, setBoard] = useState({})
     const logo = '../assets/Chess_qdt60.png';
+    // const [bounds, setBounds] = useState([])
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
     useEffect(() => {
-            if ('pieces' in board) {
-                console.log("Set State completed", board);
-                setImage(default_img_uri);
-                setImageUploadStatus(false);
-                navigation.navigate('BoardView', board);
-            }
-        }, [board])
+        if ('pieces' in board) {
+            console.log("Set State completed", board);
+            setImage(default_img_uri);
+            setImageUploadStatus(false);
+            navigation.navigate('PromptView', board);
+            setIsLoading(false);
+        }
+        // if (bounds.length > 0) {
+        //     console.log("Bounds detected");
+        //     setImageUploadStatus(false);
+        //     navigation.navigate('BoundView', {'img': image, 'points': bounds});
+        //     setImage(default_img_uri);
+        //     setIsLoading(false);
+        // }
+
+    }, [board])
 
 
     const selectFile = () => setFilePopupMenu(!filePopupMenu);
@@ -75,35 +94,58 @@ export default function HomeScreen() {
 
     const submitPressed = async () => {
         setFilePopupMenu(false);
+        setIsLoading(true);
         await uploadImage();
     }
 
-    const uploadImage = async () => {
-        // const data = new FormData();
-        // data.append('name', 'Image Upload');
-        // data.append('file', image);
-        // let res = await fetch(
-        //         'http://192.168.1.224:3000/submitImage',
-        //         {
-        //             method: 'post',
-        //             body: data,
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data; ',
-        //             },
-        //         }
-        //     );
-        // let responseJson = await res.json();
-        // if (responseJson.status == 1) {
-        //     alert('Upload Successful');
-        // }
+    const ip = 'http://192.168.1.180'  // 225 for Mac, 180 for Windows
 
-        await fetch('http://192.168.1.224:3000/classify', {
+    const uploadImage = async () => {
+
+        content_type = 'image/jpeg'
+
+        let response = await FS.uploadAsync(ip + ':3000/submitImage', 
+                            image, {
+                                headers: {
+                                "content-type": content_type,
+                                },
+                                httpMethod: "POST",
+                                uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
+                            });
+        // console.log(response.headers);
+        console.log("Image upload status: " + response.body);
+
+        await fetch(ip + ':3000/bound', {
+            method: 'GET'
+        })
+            .then(res => res.json())
+            .then(res => {
+                    // pts = [res['boardTR'], res['boardBR'], res['boardBL'], res['boardTL']]
+                    console.log("Bound status: " + res['status']);
+                    // setBounds(pts);
+                })
+            .catch(err => {
+                console.log("Failed to bound board.\n" + err);
+                setIsLoading(false);
+            });
+
+
+        await fetch(ip + ':3000/classify', {  // .225 for Mac
             method: 'GET'
         })
             .then(response => response.json())
-            .then(pieces => setBoard(pieces))
-            .catch(err => console.log("Failed to retrieve moves.\n" + err));
-        return 1;
+            .then(pieces => {
+                if (pieces['status'] === 'FAILURE') {
+                    console.log("Status: Failure");
+                    setIsLoading(false);
+                } else {
+                    setBoard(pieces);
+                }
+            })
+            .catch(err => {
+                    console.log("Failed to retrieve moves.\n" + err)
+                    setIsLoading(false);
+                });
     };
 
     if (filePopupMenu) {
@@ -128,13 +170,13 @@ export default function HomeScreen() {
             <Text style={styles.buttonText}>Select File</Text>
             </TouchableOpacity>
         )
-        }
+    }
 
-        if (imageUploadStatus && !filePopupMenu) {
+    if (imageUploadStatus && !filePopupMenu) {
         var uploadButton = (
             <>
             <TouchableOpacity onPress={submitPressed} style={styles.buttonSpecial}>
-                <Text style={styles.buttonText}>Upload</Text>
+                <Text style={styles.buttonText}>Continue</Text>
             </TouchableOpacity>
             </>
         )
@@ -142,6 +184,7 @@ export default function HomeScreen() {
 
     return (
         <View style={[styles.container, {flexDirection: "column", justifyContent: "center", width: windowWidth, height: windowHeight}]}>
+            {isLoading ? <ActivityIndicator animating={isLoading} size='large' color={'#3740ff'} style={{position: 'absolute', width: windowWidth / 2, height: windowHeight / 1.5, zIndex: 100}} /> : <></>}
             <View style={{width: '100%', height: '92%'}} >
                 <View style={[styles.centerContents, {flex: 2, backgroundColor: "#eee", paddingTop: 40}]}>
                     <View>

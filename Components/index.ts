@@ -1,4 +1,4 @@
-export { default } from "./Chess";
-import { PIECES } from "./Piece";
+export { default } from "./BoardComponents/ChessContainer";
+import { PIECES } from "./BoardComponents/Piece";
 
 export const assets = Object.values(PIECES);

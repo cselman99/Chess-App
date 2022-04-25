@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import { Chess } from "chess.js";
-import Background from "./Background";
+import Background from "../Background";
 import Piece from "./Piece";
 
 const { width } = Dimensions.get("window");
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
 const Board = (data) => {
   const chess = useConst(() => new Chess(data["fen"]));
   const [state, setState] = useState({
-    player: "w",
+    player: data["fen"].split(" ")[1],
     board: chess.board(),
   });
   const onTurn = useCallback(() => {

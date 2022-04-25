@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Vector } from "react-native-redash";
 
-import { toTranslation, SIZE, toPosition } from "./Notation";
+import { toTranslation, SIZE, toPosition } from "../Notation";
 
 const styles = StyleSheet.create({
   piece: {
@@ -24,18 +24,18 @@ type Type = "q" | "r" | "n" | "b" | "k" | "p";
 type Piece = `${Player}${Type}`;
 type Pieces = Record<Piece, ReturnType<typeof require>>;
 export const PIECES: Pieces = {
-  br: require("../assets/br.png"),
-  bp: require("../assets/bp.png"),
-  bn: require("../assets/bn.png"),
-  bb: require("../assets/bb.png"),
-  bq: require("../assets/bq.png"),
-  bk: require("../assets/bk.png"),
-  wr: require("../assets/wr.png"),
-  wn: require("../assets/wn.png"),
-  wb: require("../assets/wb.png"),
-  wq: require("../assets/wq.png"),
-  wk: require("../assets/wk.png"),
-  wp: require("../assets/wp.png"),
+  br: require("../../assets/br.png"),
+  bp: require("../../assets/bp.png"),
+  bn: require("../../assets/bn.png"),
+  bb: require("../../assets/bb.png"),
+  bq: require("../../assets/bq.png"),
+  bk: require("../../assets/bk.png"),
+  wr: require("../../assets/wr.png"),
+  wn: require("../../assets/wn.png"),
+  wb: require("../../assets/wb.png"),
+  wq: require("../../assets/wq.png"),
+  wk: require("../../assets/wk.png"),
+  wp: require("../../assets/wp.png"),
 };
 
 interface PieceProps {
