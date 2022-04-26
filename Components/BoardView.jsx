@@ -20,6 +20,9 @@ function extractMove(move) {
     const to = move['to'];
     const piece = move['piece'];
     // const captured = move['captured'];
+    if (from === undefined || to === undefined || piece === undefined) {
+        return "Can't access moves";
+    }
     return "Move " + color + " " + pieceMap[piece] + " from " + from + " to " + to
 }
 
@@ -29,7 +32,6 @@ export default function BoardView() {
     const { fen, bestMoves } = route.params;
     const [moveDescriptor, setMoveDescriptor] = useState("");
     const turn = bestMoves['color'];
-    console.log(bestMoves);
 
     useEffect(() => {
         setMoveDescriptor(extractMove(bestMoves));
@@ -43,7 +45,7 @@ export default function BoardView() {
             </View>
 
             <View style={{flex: 0.75, backgroundColor: '#000'}}>
-                <ChessContainer pieces={fen} pressEvent={() => console.log("made it")}/>
+                <ChessContainer pieces={fen} />
             </View>
 
             <View style={styles.captionContainer}>

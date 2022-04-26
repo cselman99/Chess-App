@@ -23,6 +23,7 @@ import Animated, {
   } from "react-native-reanimated";
 import EditPiece from './EditComponents/EditPiece';
 import switch_symbol from '../assets/switch_symbol.png';
+import { ip } from './Constants'
 
 const mapPieces = {
     'white-pawn': 'P',
@@ -160,7 +161,6 @@ function matTranslate({x, y}) {
 
 export default function EditView() {
     const [isLoading, setIsLoading] = useState(false);
-    const [position, setPosition] = useState({x: 0, y: 0});
     const route = useRoute();
     const navigation = useNavigation();
     const { pieces, turn, enpassant, castleWhite, castleBlack } = route.params;
@@ -173,6 +173,8 @@ export default function EditView() {
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
+
+    const position = {x: 0, y: 0};
 
     const isGestureActive = useSharedValue(false);
     const offsetX = useSharedValue(0);
@@ -248,15 +250,42 @@ export default function EditView() {
         </View>
     );
 
-    const confirmBoard = () => {
+    const minimaxConfirm = async () => {
         setIsLoading(true);
         console.log("Finding best moves...");
         const fen = matToFen(mat, turn, enpassant, castleBlack, castleWhite);
         const game = new Chess(fen);
-        const [bestMove, value] = minimax(game, 2, true, 0, turn);
+        const [bestMove, value] = await minimax(game, 6, true, turn, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
         console.log(bestMove);
-        console.log('Done');
+        console.log('Done. Score: ' + value);
         navigation.navigate('BoardView', {'fen': fen, 'bestMoves': bestMove});
+        setIsLoading(false);
+    }
+
+    const stockfishConfirm = async () => {
+        setIsLoading(true);
+        console.log("Retrieving stockfish move...");
+        const fen = matToFen(mat, turn, enpassant, castleBlack, castleWhite);
+        const response = await fetch(ip + ':3000/stockfish', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'move': fen, 'time': 5})
+        })
+            .then(response => response.json())
+            .catch(er => console.log(er));
+
+        console.log(response);
+        if (response['status'] == 'SUCCESS') {
+            const dataPackage = {
+                color: turn,
+                from: response['from'],
+                to: response['to'],
+                piece: response['piece'].toLowerCase(),
+            }
+            navigation.navigate('BoardView', {'fen': fen, 'bestMoves': dataPackage});
+        }
         setIsLoading(false);
     }
 
@@ -283,8 +312,12 @@ export default function EditView() {
             </View>
             
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={confirmBoard} style={styles.button}>
-                    <Text style={styles.buttonText}>Confirm</Text>
+                <TouchableOpacity onPress={minimaxConfirm} style={styles.button}>
+                    <Text style={styles.buttonText}>Minimax</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={stockfishConfirm} style={styles.button}>
+                    <Text style={styles.buttonText}>Stockfish</Text>
                 </TouchableOpacity>
             </View>
 

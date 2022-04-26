@@ -12,6 +12,7 @@ import { Dimensions } from 'react-native';
 import default_img from '../assets/default-image.jpeg';
 import { ActivityIndicator } from 'react-native-paper';
 import * as FS from 'expo-file-system';
+import { ip } from './Constants'
 
 
 export default function HomeScreen() {
@@ -98,7 +99,7 @@ export default function HomeScreen() {
         await uploadImage();
     }
 
-    const ip = 'http://192.168.1.180'  // 225 for Mac, 180 for Windows
+    // const ip = 'http://192.168.1.180'  // 225 for Mac, 180 for Windows
 
     const uploadImage = async () => {
 

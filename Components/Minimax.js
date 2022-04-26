@@ -93,17 +93,18 @@ var pstSelf = {'w': pst_w, 'b': pst_b};
  * using the material weights and piece square tables.
  */
 function evaluateBoard (move, prevSum, color) {
+    // Get 2D number representation of square
     var from = [8 - parseInt(move.from[1]), move.from.charCodeAt(0) - 'a'.charCodeAt(0)];
     var to = [8 - parseInt(move.to[1]), move.to.charCodeAt(0) - 'a'.charCodeAt(0)];
 
     // Change endgame behavior for kings
-    if (prevSum < -1500) {
-        if (move.piece === 'k') { move.piece = 'k_e' }
-        else if (move.captured === 'k') { move.captured = 'k_e' }
-    }
+    // if (prevSum < -1500) {
+    //     if (move.piece === 'k') { move.piece = 'k_e' }
+    //     else if (move.captured === 'k') { move.captured = 'k_e' }
+    // }
 
     if ('captured' in move) {
-        // Opponent piece was captured (good for us)
+        // Opponent piece was captured
         if (move.color === color) {
             prevSum += (weights[move.captured] + pstOpponent[move.color][move.captured][to[0]][to[1]]);
         } else {
@@ -115,7 +116,7 @@ function evaluateBoard (move, prevSum, color) {
         // NOTE: promote to queen for simplicity
         move.promotion = 'q';
 
-        // Our piece was promoted (good for us)
+        // Our piece was promoted
         if (move.color === color) {
             prevSum -= (weights[move.piece] + pstSelf[move.color][move.piece][from[0]][from[1]]);
             prevSum += (weights[move.promotion] + pstSelf[move.color][move.promotion][to[0]][to[1]]);
@@ -137,41 +138,35 @@ function evaluateBoard (move, prevSum, color) {
     return prevSum;
 }
 
-export function minimax(game, depth, isMaximizingPlayer, sum, color)
-{
-    var children = game.moves({ verbose: true });
+export async function minimax(board, depth, isMaximizingPlayer, color, alpha, beta, move=null) {
+    var children = board.moves({ verbose: true });
     // Sort moves randomly, so the same move isn't always picked on ties
-    children.sort(function(a, b){return 0.5 - Math.random()});
-
-    var currMove;
+    // children.sort(function(a, b){return 0.5 - Math.random()});
     // Maximum depth exceeded or node is a terminal node (no children)
     if (depth === 0 || children.length === 0) {
-        return [null, sum]
+        if (move === null) {
+            return [null, 0];
+        }
+        return [null, evaluateBoard(move, 0, color)];  // Reach max depth / exhaust moves... eval board position
     }
-    // Find maximum/minimum from list of 'children' (possible moves)
-    var alpha = Number.NEGATIVE_INFINITY;
-    var beta = Number.POSITIVE_INFINITY;
     var bestMove;
 
     for (var i = 0; i < children.length; i++) {
-        currMove = children[i];
-        var currPrettyMove = game.move(currMove);
-        var newSum = evaluateBoard(currPrettyMove, sum, color);
-        game.undo();
-
-        var [childBestMove, value] = minimax(game, depth - 1, !isMaximizingPlayer, newSum, color);
+        var curMove = board.move(children[i]);
+        var [childBestMove, value] = minimax(board, depth - 1, !isMaximizingPlayer, color, alpha, beta, move=curMove);
+        board.undo();
 
         if (isMaximizingPlayer) {
             if (value >= beta) { break; }
             if (value > alpha) {
                 alpha = value;
-                bestMove = currPrettyMove;
+                bestMove = curMove;
             }
         } else {
             if (value <= alpha) { break; }
             if (value < beta) {
                 beta = value;
-                bestMove = currPrettyMove;
+                bestMove = curMove;
             }
         }
     }
