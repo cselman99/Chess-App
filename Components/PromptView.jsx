@@ -9,6 +9,7 @@ import {
     } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
+import { buildMat } from './EditHelpers';
 
 
 export default function BoundView() {

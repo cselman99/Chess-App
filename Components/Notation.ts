@@ -53,7 +53,7 @@ export const BLACK_PIECES = {
   n: require("../assets/bn.png"),
   b: require("../assets/bb.png"),
   q: require("../assets/bq.png"),
-  k: require("../assets/bk.png"),
+  // k: require("../assets/bk.png"),
 }
 
 export const WHITE_PIECES = {
@@ -62,5 +62,5 @@ export const WHITE_PIECES = {
   N: require("../assets/wn.png"),
   B: require("../assets/wb.png"),
   Q: require("../assets/wq.png"),
-  K: require("../assets/wk.png"),
+  // K: require("../assets/wk.png"),
 }

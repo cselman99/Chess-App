@@ -5,11 +5,10 @@ import EditBoard from "./EditBoard";
 
 const EditContainer = (data) => {
   const mat = data['mat'];
-  const handlePress = data['handlePress'];
 
   return (
     <View style={styles.container}>
-      <EditBoard mat={mat} handlePress={handlePress} />
+      <EditBoard key={mat} mat={mat} />
     </View>
   );
 };

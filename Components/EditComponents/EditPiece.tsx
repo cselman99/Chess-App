@@ -27,7 +27,7 @@ const matTranslate = ({x, y}) => {
   return {x: Math.round(x / SIZE), y: Math.round(y / SIZE)};
 }
 
-const EditPiece = ({ id, position, board }) => {
+const EditPiece = ({ id, name, position, board, removeSelf }) => {
   // console.log(board);
   const isGestureActive = useSharedValue(false);
   const offsetX = useSharedValue(0);
@@ -46,7 +46,8 @@ const EditPiece = ({ id, position, board }) => {
         } else {  // Remove from View (Lazy method)
           translateX.value = -100;
           translateY.value = -100;
-          board[fromArr.y][fromArr.x] = '';
+          // board[fromArr.y][fromArr.x] = '';
+          removeSelf(id, {y: fromArr.y, x: fromArr.x});
           return;
         }
       }
@@ -63,7 +64,6 @@ const EditPiece = ({ id, position, board }) => {
         offsetY.value = translateY.value;
         isGestureActive.value = false;
       });
-
       const toPiece = board[toArr.y][toArr.x];
       board[toArr.y][toArr.x] = board[fromArr.y][fromArr.x];
       board[fromArr.y][fromArr.x] = toPiece;
@@ -124,7 +124,7 @@ const EditPiece = ({ id, position, board }) => {
       <Animated.View style={underlay} />
       <PanGestureHandler onGestureEvent={onGestureEvent} enabled={true}>
         <Animated.View style={style}>
-            <Image source={PIECES[id]} style={styles.piece} />
+            <Image source={PIECES[name]} style={styles.piece} />
         </Animated.View>
       </PanGestureHandler>
     </>

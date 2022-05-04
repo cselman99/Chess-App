@@ -52,28 +52,11 @@ const styles = StyleSheet.create({
 
 const EditBoard = (data) => {
   const mat = useConst(() => data["mat"]);
-  var key = 0;
 
   return (
     <View style={styles.container}>
       <Background />
-      {mat.map((row, y) =>
-        row.map((piece, x) => {
-          if (piece !== '') {
-            key += 1;
-            // console.log("key: " + key);
-            return (
-              <EditPiece
-                key={`${key}`}
-                id={`${piece}` as const}
-                position={{ x, y }}
-                board={mat}
-              />
-            );
-          }
-          return null;
-        })
-      )}
+      {mat}
     </View>
   );
 };
