@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { TouchableOpacity,
     StyleSheet,
     Text, 
@@ -61,16 +61,11 @@ export default function EditView() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [boardBoundaries, setBoardBoundaries] = useState({x: 0, y: 0, w: 0, h: 0});
-    const [selectBoundaries, setSelectBoundaries] = useState({});
+    const [selectBoundaries, setSelectBoundaries] = useState({x: 0, y: 0, w: 0, h: 0});
     const [pieceList, setPieceList] = useState([]);
     const [piecePicker, setPiecePicker] = useState(piecePickerWhite);
 
     const piecePickerRef = useRef(piecePicker);
-
-    useEffect(() => {
-        console.log("Update to label: " + piecePicker.label);
-    }, [piecePicker]);
-
     
     const removePiece = (id, position) => {
         console.log('removing piece ' + id);
@@ -182,7 +177,6 @@ export default function EditView() {
                     console.log('Denied:  ' + newTo.x + ", " + newTo.y);
                     return;
                 }
-                console.log('Add piece test: ' + piecePickerRef.current['label']);
                 const pieceName = piecePickerRef.current.label === 'w' ? piece : piece.toLowerCase();
                 translateX.value = 0;
                 translateY.value = 0;

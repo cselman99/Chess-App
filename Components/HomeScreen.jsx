@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet,
     Text,
     View,
@@ -22,12 +22,14 @@ export default function HomeScreen() {
     const [filePopupMenu, setFilePopupMenu] = useState(false);
     const [imageUploadStatus, setImageUploadStatus] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [board, setBoard] = useState({})
-    const logo = '../assets/Chess_qdt60.png';
-    // const [bounds, setBounds] = useState([])
+    const [board, setBoard] = useState({});
+    const [showError, setShowError] = useState(false);
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
+    const OPERATION_FAILURE = 'FAILURE';
+
+    const statusRef = useRef(null);
 
     useEffect(() => {
         if ('pieces' in board) {
@@ -37,14 +39,6 @@ export default function HomeScreen() {
             navigation.navigate('PromptView', board);
             setIsLoading(false);
         }
-        // if (bounds.length > 0) {
-        //     console.log("Bounds detected");
-        //     setImageUploadStatus(false);
-        //     navigation.navigate('BoundView', {'img': image, 'points': bounds});
-        //     setImage(default_img_uri);
-        //     setIsLoading(false);
-        // }
-
     }, [board])
 
 
@@ -108,7 +102,7 @@ export default function HomeScreen() {
 
     const uploadImage = async () => {
 
-        content_type = 'image/jpeg'
+        const content_type = 'image/jpeg'
 
         let response = await FS.uploadAsync(ip + ':3000/submitImage', 
                             image, {
@@ -119,39 +113,50 @@ export default function HomeScreen() {
                                 uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
                             });
         // console.log(response.headers);
-        console.log("Image upload status: " + response.body);
+        console.log("Image upload status: " + response.body['status']);
+
+        if (response.body['status'] === OPERATION_FAILURE) {
+            setShowError(true);
+            return;
+        }
 
         await fetch(ip + ':3000/bound', {
             method: 'GET'
         })
             .then(res => res.json())
             .then(res => {
-                    // pts = [res['boardTR'], res['boardBR'], res['boardBL'], res['boardTL']]
                     console.log("Bound status: " + res['status']);
-                    // setBounds(pts);
+                    statusRef.current = res['status'];
                 })
             .catch(err => {
                 console.log("Failed to bound board.\n" + err);
+                statusRef.current = res['status'];
                 setIsLoading(false);
             });
 
+        if (statusRef.current === OPERATION_FAILURE) {
+            setShowError(true);
+            return;
+        }
 
         await fetch(ip + ':3000/classify', {  // .225 for Mac
             method: 'GET'
         })
             .then(response => response.json())
-            .then(pieces => {
-                if (pieces['status'] === 'FAILURE') {
-                    console.log("Status: Failure");
+            .then(res => {
+                if (res['status'] === OPERATION_FAILURE) {
+                    console.log("Failed to classify pieces");
+                    setShowError(true);
                     setIsLoading(false);
                 } else {
-                    setBoard(pieces);
+                    setBoard(res['pieces']);
                 }
             })
             .catch(err => {
-                    console.log("Failed to retrieve moves.\n" + err)
-                    setIsLoading(false);
-                });
+                console.log("Failed to retrieve moves.\n" + err);
+                setShowError(true);
+                setIsLoading(false);
+            });
     };
 
     if (filePopupMenu) {
@@ -188,25 +193,25 @@ export default function HomeScreen() {
         )
     }
 
+    const errorPrompt = (
+        <View style={[styles.centerContents, {marginTop: 10}]}>
+            <Text style={{color: 'red', fontSize: 16, textAlign: 'center', fontWeight: 'bold'}} >Error:</Text>
+            <Text style={{color: 'red', fontSize: 16, textAlign: 'center', marginTop: -10}}>{'\nFailed to upload image,\nplease try again.'}</Text>
+        </View>
+    );
+
     return (
         <View style={[styles.container, {flexDirection: "column", justifyContent: "center", width: windowWidth, height: windowHeight}]}>
             {isLoading ? <ActivityIndicator animating={isLoading} size='large' color={'#3740ff'} style={{position: 'absolute', width: windowWidth / 2, height: windowHeight / 1.5, zIndex: 100}} /> : <></>}
             <View style={{width: '100%', height: '88%'}} >
-                {/* <View style={[styles.centerContents, {flex: 2, backgroundColor: "#eee", paddingTop: 40}]}>
-                    <View>
-                        <ImageBackground source={{'uri': image}} style={{'height': '90%', 'width': undefined, 'aspectRatio': 1}}></ImageBackground>
-                    </View>
-                    <View style={{top: '-8%'}}>
-                        <ImageBackground source={require(logo)} style={{'height': 60, 'width': 60}}></ImageBackground>
-                    </View>
-                </View> */}
                 <View style={[styles.centerContents, {height: '18%'}]} >
                     <Image source={require('../assets/bq.png')} />
-                    <Text style={{fontSize: 30, marginTop: 10, fontWeight: '300', fontFamily: 'Times New Roman'}}>CARTER GAMBIT</Text>
+                    <Text style={{fontSize: 30, marginTop: 10, fontWeight: '300', fontFamily: 'Times New Roman'}}>CARTER'S GAMBIT</Text>
                 </View>
                 <View style={[styles.centerContents, {height: '60%'}]} >
                     <Text style={{fontSize: 16}} >Upload Status</Text>
                     <Image source={imageUploadStatus ? require('../assets/checkmark.png') : require('../assets/red_x.png')} style={{height: 60, width: 60, marginTop: 10}} />
+                    {showError ? errorPrompt : null}
                 </View>
                 <View  style={[styles.centerContents, {height: '22%', justifyContent: 'flex-end'}]} >
                     {menu}
