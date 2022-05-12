@@ -1,7 +1,6 @@
-import { Chess, Position } from "chess.js";
 import React, { useCallback } from "react";
 import { StyleSheet, Image } from "react-native";
-import { PanGestureHandler, TouchableHighlight } from "react-native-gesture-handler";
+import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedGestureHandler,
@@ -9,7 +8,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Vector } from "react-native-redash";
 
 import { toTranslation, SIZE, toPosition, PIECES } from "../Notation";
 
@@ -23,7 +21,6 @@ const styles = StyleSheet.create({
 
 const matTranslate = ({x, y}) => {
   'worklet';
-  
   return {x: Math.round(x / SIZE), y: Math.round(y / SIZE)};
 }
 
@@ -73,7 +70,6 @@ const EditPiece = ({ id, name, position, board, removeSelf }) => {
   );
   const onGestureEvent = useAnimatedGestureHandler({
     onStart: () => {
-      console.log("Gesture triggered");
       offsetX.value = translateX.value;
       offsetY.value = translateY.value;
       isGestureActive.value = true;

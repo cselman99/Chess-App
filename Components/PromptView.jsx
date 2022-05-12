@@ -6,6 +6,7 @@ import {
     View, 
     ImageBackground, 
     TextInput,
+    Image,
     } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
@@ -43,17 +44,22 @@ export default function BoundView() {
     return (
         <View style={styles.root}>
             <View style={{position: 'absolute', top: '3%'}}>
-                <ImageBackground source={require(logo)} style={{'height': 60, 'width': 60}}></ImageBackground>
+                <Image source={require(logo)} style={{'height': 60, 'width': 60}} />
             </View>
-            <View style={styles.textbox}>
-                <Text style={styles.question}>To move? (W / B)</Text>
-                <TextInput
-                    style={{height: 40}}
-                    maxLength={1}
-                    placeholder=""
-                    onChangeText={newText => setTurn(newText)}
-                    defaultValue={turn}
-                />
+            <View style={[styles.textbox, {borderWidth: 0, height: '15%'}]}>
+                <Text style={styles.question}>Color to move?</Text>
+                <View style={[styles.inline, styles.twobuttons]}>
+                    <View style={[styles.buttonBackground, turn === 'w' ? styles.active : styles.inactive]} >
+                        <TouchableOpacity onPress={() => setTurn('w')} >
+                            <Image source={require('../assets/wp.png')} styles={styles.squareButton} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={[styles.buttonBackground, turn === 'b' ? styles.active : styles.inactive]} >
+                        <TouchableOpacity onPress={() => setTurn('b')} >
+                            <Image source={require('../assets/bp.png')} styles={styles.squareButton} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </View>
             <View style={styles.textbox}>
                 <Text style={styles.question}>Current En Passant?</Text>
@@ -66,7 +72,7 @@ export default function BoundView() {
                 />
             </View>
             <View style={styles.textbox}>
-                <Text style={styles.question}>Castle Black?</Text>
+                <Text style={styles.question}>Black castling status?</Text>
                 <TextInput
                     style={{height: 40}}
                     maxLength={2}
@@ -75,7 +81,7 @@ export default function BoundView() {
                 />
             </View>
             <View style={styles.textbox}>
-                <Text style={styles.question}>Castle White?</Text>
+                <Text style={styles.question}>White castling status?</Text>
                 <TextInput
                     style={{height: 40}}
                     maxLength={2}
@@ -144,6 +150,37 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 4,
         marginBottom:12,
-      },
+    },
+    inline: {
+        display: 'flex',
+        flexDirection: 'row'
+    },
+    twobuttons: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        // backgroundColor: 'red'
+    },
+    buttonBackground: {
+        width: 80,
+        height: 80,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    active: {
+        backgroundColor: 'yellow',
+    },
+    inactive: {
+        backgroundColor: '#ddd',
+    },
+    squareButton: {
+        width: 60,
+        height: 60,
+        borderWidth: 2,
+        borderColor: 'black',
+        overflow: 'hidden',
+    }
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TouchableOpacity,
     StyleSheet,
     Text, 
@@ -49,38 +49,40 @@ export default function EditView() {
     var relX = 0.06 * windowWidth;
     const listPieces = ['Q', 'B', 'N', 'R', 'P'];
 
+    const piecePickerWhite = {
+        'pieces': WHITE_PIECES,
+        'label': 'w',
+    }
+
+    const piecePickerBlack = {
+        'pieces': BLACK_PIECES,
+        'label': 'b',
+    }
+
     const [isLoading, setIsLoading] = useState(false);
     const [boardBoundaries, setBoardBoundaries] = useState({x: 0, y: 0, w: 0, h: 0});
     const [selectBoundaries, setSelectBoundaries] = useState({});
     const [pieceList, setPieceList] = useState([]);
-    const [piecePicker, setPiecePicker] = useState({
-        'pieces': WHITE_PIECES,
-        'label': 'w',
-    });
+    const [piecePicker, setPiecePicker] = useState(piecePickerWhite);
 
-    var pieceID = -1;
-    function getPieceID() {
-        pieceID += 1;
-        return pieceID.toString();
-    }
+    const piecePickerRef = useRef(piecePicker);
+
+    useEffect(() => {
+        console.log("Update to label: " + piecePicker.label);
+    }, [piecePicker]);
+
     
-    console.log('Rendering EditView');
-
     const removePiece = (id, position) => {
         console.log('removing piece ' + id);
-        const filteredList = pieceList.filter(piece => piece.id !== id);
-        setPieceList(filteredList);
-
         const matClone = mat;
         matClone[position.y][position.x] = '';
         setMat(matClone);
-
+        setPieceList(buildPieceList(matClone))
         printMat(mat);
     }
 
     function pieceFactory(pl) {
         const newList = pl.map( val => {
-            // console.log(val.id, val.name, val.position);
             return (
                 <EditPiece
                     key={val.id}
@@ -103,10 +105,12 @@ export default function EditView() {
                 })}
             </View>
             <View styles={{height: SIZE, width: SIZE}}>
-                <TouchableOpacity onPress={() => setPiecePicker({
-                    label: piecePicker['label'] === 'w' ? 'b' : 'w',
-                    pieces: piecePicker['label'] === 'w' ? BLACK_PIECES : WHITE_PIECES
-                })} >
+                <TouchableOpacity onPress={() => {
+                    setPiecePicker((prevState) => {
+                        piecePickerRef.current = prevState.label === 'w' ? piecePickerBlack : piecePickerWhite
+                        return prevState.label === 'w' ? piecePickerBlack : piecePickerWhite
+                    });
+                }} >
                     <Image source={require('../assets/switch_symbol.png')}
                         style={{ width: SIZE, height: SIZE }} />
                 </TouchableOpacity>
@@ -165,7 +169,6 @@ export default function EditView() {
     
         const findSquare = (coords) => {
             const res = {x: Math.round(coords.x / SIZE) - 1, y: Math.round(coords.y / SIZE)};
-            // console.log("findSquare: " + res.x + " " + res.y);
             return res;
         }
     
@@ -174,30 +177,26 @@ export default function EditView() {
                 const page_margin = Math.ceil((boardBoundaries.h - boardBoundaries.w) / 2);
                 const top =  boardBoundaries.y + page_margin
                 var coords = {x: relX + selectBoundaries.x + to.x, y: selectBoundaries.y + to.y - top};
-                // console.log("coords: (" + coords.x, coords.y + ")");
                 const newTo = findSquare(coords);
                 if (newTo.x > 7 || newTo.x < 0 || newTo.y > 7 || newTo.y < 0 || mat[newTo.y][newTo.x] !== '') {
                     console.log('Denied:  ' + newTo.x + ", " + newTo.y);
                     return;
                 }
-                // console.log("Adding " + chosenPiece + " to " + newTo.x + " " + newTo.y);
-                const pieceName = piecePicker.label == 'w' ? piece : piece.toLowerCase();
+                console.log('Add piece test: ' + piecePickerRef.current['label']);
+                const pieceName = piecePickerRef.current.label === 'w' ? piece : piece.toLowerCase();
                 translateX.value = 0;
                 translateY.value = 0;
                 isGestureActive.value = false;
 
-                const matCopy = mat;
-                matCopy[newTo.y][newTo.x] = pieceName;
-                setMat(matCopy);
+                const matClone = mat;
+                matClone[newTo.y][newTo.x] = pieceName;
+                setMat(matClone);
 
-                const pieceID = getPieceID();
-                const newpiece = {
-                    id: pieceID,
-                    name: pieceName,
-                    position: { x: newTo.x, y: newTo.y },
-                };
-                console.log("adding new piece " + pieceName);
-                setPieceList([...pieceList, newpiece]);
+                const merged = buildPieceList(matClone);
+                setPieceList(merged);
+
+                console.log("Adding new piece " + pieceName);
+                printMat(mat);
             },
             [mat, pieceList, isGestureActive, offsetX, offsetY, translateX, translateY]
         );
@@ -238,14 +237,15 @@ export default function EditView() {
             </PanGestureHandler>);
     }
 
-    const prepBoard = () => {
+    function buildPieceList(mat) {
+        var pieceId = -1;
         const mappedPieces2D = mat.map((row, y) =>
             (row.map((piece, x) => {
                 if (piece !== '') {
-                    const pieceID = getPieceID();
+                    pieceId += 1;
                     return (
                         {
-                            id: pieceID,
+                            id: pieceId,
                             name: piece,
                             position: { x: x, y: y },
                         }
@@ -256,8 +256,9 @@ export default function EditView() {
         var merged = mappedPieces2D.reduce(function(prev, next) {
             return prev.concat(next);
         });
-        setPieceList(merged);
-    };
+        return merged;
+    }
+
 
     return (
         <View style={styles.container}>
@@ -266,16 +267,14 @@ export default function EditView() {
 
             <View style={{flex: 4, backgroundColor: '#fff', marginTop: 0}} onLayout={(event) => {
                 var {x, y, width, height} = event.nativeEvent.layout;
-                // console.log("board " + x, y, width, height);
                 setBoardBoundaries({ x: x, y: y, w: width, h: height });
-                prepBoard();
+                setPieceList(buildPieceList(mat));
             }}>
                 <EditContainer key={pieceList} mat={pieceFactory(pieceList)}/> 
             </View>
 
             <View style={{display: 'flex', flexDirection: 'row', width: '100%'}} onLayout={(event) => {
                 var {x, y, width, height} = event.nativeEvent.layout;
-                // console.log("pieces " + x, y, width, height);
                 setSelectBoundaries({ x: x, y: y, w: width, h: height });
             }}>
                 {picker}

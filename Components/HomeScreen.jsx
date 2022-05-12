@@ -50,7 +50,6 @@ export default function HomeScreen() {
 
     const selectFile = () => setFilePopupMenu(!filePopupMenu);
     const takePhoto = async () => {
-        console.log("Take Photo Pressed");
         const res = await ImagePicker.getCameraPermissionsAsync();
         if (Platform.OS == "ios" && res.status !== 'granted') {
             const {s} = await ImagePicker.requestCameraPermissionsAsync();
@@ -59,9 +58,14 @@ export default function HomeScreen() {
             return;
             }
         }
-        const image = await ImagePicker.launchCameraAsync();
+        const image = await ImagePicker.launchCameraAsync({
+            aspect: [1, 1],
+            quality: 1,
+        });
 
         if (!image.cancelled) {
+            console.log(image.height, image.width);
+            
             setImage(image.uri);
             setImageUploadStatus(true);
             setFilePopupMenu(!filePopupMenu);
@@ -69,7 +73,6 @@ export default function HomeScreen() {
     };
 
     const choosePhoto = async () => {
-        console.log("Choose Photo Pressed");
         const res = await ImagePicker.getMediaLibraryPermissionsAsync();
         if (Platform.OS === "ios" && res.status !== 'granted') {
             const {s} = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -87,6 +90,8 @@ export default function HomeScreen() {
         });
 
         if (!image.cancelled) {
+            console.log(image.height, image.width);
+
             setImage(image.uri);
             setImageUploadStatus(true);
             setFilePopupMenu(!filePopupMenu);
@@ -186,16 +191,24 @@ export default function HomeScreen() {
     return (
         <View style={[styles.container, {flexDirection: "column", justifyContent: "center", width: windowWidth, height: windowHeight}]}>
             {isLoading ? <ActivityIndicator animating={isLoading} size='large' color={'#3740ff'} style={{position: 'absolute', width: windowWidth / 2, height: windowHeight / 1.5, zIndex: 100}} /> : <></>}
-            <View style={{width: '100%', height: '92%'}} >
-                <View style={[styles.centerContents, {flex: 2, backgroundColor: "#eee", paddingTop: 40}]}>
+            <View style={{width: '100%', height: '88%'}} >
+                {/* <View style={[styles.centerContents, {flex: 2, backgroundColor: "#eee", paddingTop: 40}]}>
                     <View>
                         <ImageBackground source={{'uri': image}} style={{'height': '90%', 'width': undefined, 'aspectRatio': 1}}></ImageBackground>
                     </View>
                     <View style={{top: '-8%'}}>
                         <ImageBackground source={require(logo)} style={{'height': 60, 'width': 60}}></ImageBackground>
                     </View>
+                </View> */}
+                <View style={[styles.centerContents, {height: '18%'}]} >
+                    <Image source={require('../assets/bq.png')} />
+                    <Text style={{fontSize: 30, marginTop: 10, fontWeight: '300', fontFamily: 'Times New Roman'}}>CARTER GAMBIT</Text>
                 </View>
-                <View  style={[styles.centerContents, {flex: 1.2, justifyContent: 'flex-end'}]} >
+                <View style={[styles.centerContents, {height: '60%'}]} >
+                    <Text style={{fontSize: 16}} >Upload Status</Text>
+                    <Image source={imageUploadStatus ? require('../assets/checkmark.png') : require('../assets/red_x.png')} style={{height: 60, width: 60, marginTop: 10}} />
+                </View>
+                <View  style={[styles.centerContents, {height: '22%', justifyContent: 'flex-end'}]} >
                     {menu}
                     {uploadButton}
                 </View>
@@ -209,7 +222,7 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       backgroundColor: '#fff',
     },
   
