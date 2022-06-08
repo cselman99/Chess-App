@@ -119,7 +119,8 @@ export default function EditView() {
         console.log("Finding best moves...");
         const fen = eh.matToFen(mat, turn, enpassant, castleBlack, castleWhite);
         const game = new Chess(fen);
-        const [bestMove, value] = await minimax(game, 3, true, turn, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+        const [bestMove, value] = await minimax(game, 3, true, turn, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY)
+                                            .catch(err => console.log('HERE: ', err));
         console.log(bestMove);
         console.log('Done. Score: ' + value);
         navigation.navigate('BoardView', {'fen': fen, 'bestMoves': bestMove});

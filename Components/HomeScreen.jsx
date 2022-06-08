@@ -53,7 +53,7 @@ export default function HomeScreen() {
             }
         }
         const image = await ImagePicker.launchCameraAsync({
-            aspect: [1, 1],
+            aspect: [2, 3],
             quality: 1,
         });
 
@@ -79,7 +79,7 @@ export default function HomeScreen() {
         let image = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [2, 3],
             quality: 1,
         });
 
@@ -103,7 +103,6 @@ export default function HomeScreen() {
     const uploadImage = async () => {
 
         const content_type = 'image/jpeg'
-
         let response = await FS.uploadAsync(ip + ':3000/submitImage', 
                             image, {
                                 headers: {
@@ -112,10 +111,10 @@ export default function HomeScreen() {
                                 httpMethod: "POST",
                                 uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
                             });
-        // console.log(response.headers);
-        console.log("Image upload status: " + response.body['status']);
+        console.log("Image upload status: " + response.body);
 
         if (response.body['status'] === OPERATION_FAILURE) {
+            console.log("Error reached.");
             setShowError(true);
             return;
         }
@@ -130,16 +129,17 @@ export default function HomeScreen() {
                 })
             .catch(err => {
                 console.log("Failed to bound board.\n" + err);
-                statusRef.current = res['status'];
+                statusRef.current = err['status'];
                 setIsLoading(false);
             });
 
         if (statusRef.current === OPERATION_FAILURE) {
+            console.log("Error reached.");
             setShowError(true);
             return;
         }
 
-        await fetch(ip + ':3000/classify', {  // .225 for Mac
+        await fetch(ip + ':3000/classify', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -149,7 +149,7 @@ export default function HomeScreen() {
                     setShowError(true);
                     setIsLoading(false);
                 } else {
-                    setBoard(res['pieces']);
+                    setBoard(res);
                 }
             })
             .catch(err => {

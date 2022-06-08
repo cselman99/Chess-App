@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js';
 
-var weights = { 'p': 100, 'n': 280, 'b': 320, 'r': 479, 'q': 929, 'k': 60000, 'k_e': 60000 };
+var weights = { 'p': 100, 'n': 270, 'b': 330, 'r': 480, 'q': 1000, 'k': 50000, 'k_e': 50000 };
 var pst_w = {
     'p':[
             [ 100, 100, 100, 100, 105, 100, 100,  100],
@@ -98,10 +98,10 @@ function evaluateBoard (move, prevSum, color) {
     var to = [8 - parseInt(move.to[1]), move.to.charCodeAt(0) - 'a'.charCodeAt(0)];
 
     // Change endgame behavior for kings
-    // if (prevSum < -1500) {
-    //     if (move.piece === 'k') { move.piece = 'k_e' }
-    //     else if (move.captured === 'k') { move.captured = 'k_e' }
-    // }
+    if (prevSum < -1500) {
+        if (move.piece === 'k') { move.piece = 'k_e' }
+        else if (move.captured === 'k') { move.captured = 'k_e' }
+    }
 
     if ('captured' in move) {
         // Opponent piece was captured
@@ -140,8 +140,7 @@ function evaluateBoard (move, prevSum, color) {
 
 export async function minimax(board, depth, isMaximizingPlayer, color, alpha, beta, move=null) {
     var children = board.moves({ verbose: true });
-    // Sort moves randomly, so the same move isn't always picked on ties
-    // children.sort(function(a, b){return 0.5 - Math.random()});
+
     // Maximum depth exceeded or node is a terminal node (no children)
     if (depth === 0 || children.length === 0) {
         if (move === null) {
